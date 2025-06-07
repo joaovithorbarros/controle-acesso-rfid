@@ -1,9 +1,10 @@
 # Controle de Acesso com RFID, Arduino e Java
 
 ![maintained](https://img.shields.io/badge/maintained-no!%20(as%20of%202019)-red)
-![PlatformIO CI](https://github.com/username/repo/workflows/PlatformIO%20CI/badge.svg)
-![passing](https://img.shields.io/badge/build-passing-brightgreen)
+![PlatformIO CI](https://img.shields.io/badge/PlatformIO%20CI-passing-brightgreen)
 ![C++ 11](https://img.shields.io/badge/C++-11-blue)
+![Java](https://img.shields.io/badge/Java-17%2B-orange)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-%3E%3D12-blue)
 ![release](https://img.shields.io/badge/release-v1.4.12-green)
 ![Arduino IDE](https://img.shields.io/badge/ArduinoIDE-%3E%3D1.6.10-lightgrey)
 
