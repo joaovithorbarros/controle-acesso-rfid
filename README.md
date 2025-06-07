@@ -26,8 +26,11 @@ Este projeto demonstra um sistema completo de controle de acesso físico usando:
 ## Estrutura do projeto
 
 arduino/ → Código Arduino (.ino)
+
 java/src/ → Código Java (Main, Card, etc)
+
 banco/ → Scripts SQL para criar a tabela no PostgreSQL
+
 README.md → Este arquivo
 
 
