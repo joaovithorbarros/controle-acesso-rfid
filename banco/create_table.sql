@@ -1,0 +1,7 @@
+CREATE DATABASE controle_acesso;
+
+CREATE TABLE IF NOT EXISTS tags_rfid (
+    id SERIAL PRIMARY KEY,
+    uid VARCHAR(50) UNIQUE,
+    date TIMESTAMP DEFAULT NOW()
+);

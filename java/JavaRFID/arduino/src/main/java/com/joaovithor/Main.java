@@ -19,7 +19,6 @@ public class Main {
         try (Connection conn = DriverManager.getConnection(
                 "jdbc:postgresql://localhost:5432/controle_acesso", "postgres", "1234")) {
 
-            StringBuilder linha = new StringBuilder();
 
             while (true) {
                 if(port.bytesAvailable() > 0){
