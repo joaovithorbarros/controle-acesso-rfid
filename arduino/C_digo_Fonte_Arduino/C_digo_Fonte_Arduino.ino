@@ -32,6 +32,7 @@ void bip(int tempo = 150, int frq = 2000){
 
 void bipPermitido(){ bip(200, 2000); }
 void bipNegado()   { bip(500, 300);  }
+void bipDeletado() { bip(700, 500); }
 
 void loop() {
   if (Serial.available()) {
@@ -42,6 +43,8 @@ void loop() {
       bipPermitido();
     } else if (comando == "BIP:NEGADO") {
       bipNegado();
+    } else if (comando == "BIP:DELETADO"){
+      bipDeletado();
     }
   }
   

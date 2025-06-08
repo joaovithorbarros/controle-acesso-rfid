@@ -19,7 +19,6 @@ public class Main {
         try (Connection conn = DriverManager.getConnection(
                 "jdbc:postgresql://localhost:5432/controle_acesso", "postgres", "1234")) {
 
-
             while (true) {
                 if(port.bytesAvailable() > 0){
                     byte[] buffer = new byte[port.bytesAvailable()];
@@ -49,7 +48,14 @@ public class Main {
                                 port.writeBytes("BIP:NEGADO\n".getBytes(), "BIP:NEGADO\n".length());
                             }
                         } else if(currentMode == BUTTON_MODE.EXCLUIR){
-                            deleteUID(conn, card);
+                            try {
+                                deleteUID(conn, card);
+                                System.out.println("Cartão deletado.");
+                                port.writeBytes("BIP:PERMITIDO\n".getBytes(), "BIP:PERMITIDO\n".length());
+                            } catch (DataConflictException ERROR) {
+                                System.out.println("ERROR MESSAGE: " + ERROR.getMessage());
+                                port.writeBytes("BIP:DELETADOz\n".getBytes(), "BIP:DELETADO\n".length());
+                            }
                         }
                     }
                 }
@@ -85,8 +91,10 @@ public class Main {
     }
 
     private static void deleteUID(Connection conn, Card card) throws SQLException{
+        if(!checkUID(conn, card)){throw new DataConflictException("Cartão não existe no banco de dados");}
         PreparedStatement stmt = conn.prepareStatement("DELETE FROM tags_rfid WHERE uid = ? ");
         stmt.setString(1, card.getUID());
+        System.out.println("Cartão deletado");
         stmt.executeUpdate();
         stmt.close();
     }
