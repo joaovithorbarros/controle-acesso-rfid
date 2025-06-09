@@ -1,5 +1,8 @@
 package com.joaovithor;
 import com.fazecast.jSerialComm.SerialPort;
+import com.joaovithor.exception.DataConflictException;
+import com.joaovithor.model.Card;
+
 import java.sql.*;
 import java.time.LocalDateTime;
 

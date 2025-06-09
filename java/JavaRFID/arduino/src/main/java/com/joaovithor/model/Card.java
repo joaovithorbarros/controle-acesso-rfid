@@ -1,4 +1,4 @@
-package com.joaovithor;
+package com.joaovithor.model;
 
 public class Card {
     private Long id;

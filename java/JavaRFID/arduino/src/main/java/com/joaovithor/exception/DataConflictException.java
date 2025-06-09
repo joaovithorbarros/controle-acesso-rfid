@@ -1,4 +1,4 @@
-package com.joaovithor;
+package com.joaovithor.exception;
 
 public class DataConflictException extends RuntimeException{
     public DataConflictException(String message){
