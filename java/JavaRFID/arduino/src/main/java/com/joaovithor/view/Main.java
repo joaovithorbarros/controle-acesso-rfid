@@ -1,4 +1,4 @@
-package com.joaovithor;
+package com.joaovithor.view;
 import com.fazecast.jSerialComm.SerialPort;
 import com.joaovithor.exception.DataConflictException;
 import com.joaovithor.model.Card;
