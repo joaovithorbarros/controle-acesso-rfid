@@ -3,72 +3,73 @@ import com.fazecast.jSerialComm.SerialPort;
 import com.joaovithor.exception.DataConflictException;
 import com.joaovithor.model.Card;
 
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
 import java.sql.*;
 import java.time.LocalDateTime;
 
-public class Main {
+public class Main extends Application {
+
+    private Label actualMode = new Label("Modo atual: ---");
+    private TextArea logArea = new TextArea();
+    private Card card;
+
     enum BUTTON_MODE{CADASTRAR, VALIDAR, EXCLUIR}
     static BUTTON_MODE currentMode = BUTTON_MODE.CADASTRAR;
-    public static void main(String[] args) {
-        Card card;
+
+    @Override
+    public void start(Stage primaryStage){
+        logArea.setEditable(false);
+        VBox root = new VBox(10, actualMode, logArea);
+        Scene scene = new Scene(root, 500, 500);
+
+        primaryStage.setTitle("Controle de Acesso - Interface");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+        startSerialCommunication();
+
+    }
+    private void startSerialCommunication() {
         SerialPort port = SerialPort.getCommPort("COM4"); 
         port.setBaudRate(9600);
 
         if (!port.openPort()) {
-            System.out.println("Erro ao abrir porta.");
+            appendLog("Erro ao abrir porta serial.");
             return;
         }
 
-        try (Connection conn = DriverManager.getConnection(
-                "jdbc:postgresql://localhost:5432/controle_acesso", "postgres", "1234")) {
+        Thread serialThread = new Thread(() ->{
+            try (Connection conn = DriverManager.getConnection(
+                    "jdbc:postgresql://localhost:5432/controle_acesso", "postgres", "1234")) {
 
-            while (true) {
-                if(port.bytesAvailable() > 0){
-                    byte[] buffer = new byte[port.bytesAvailable()];
-                    port.readBytes(buffer, buffer.length);
-                    String serialInput = new String(buffer).trim(); 
+                while (true) {
+                    if(port.bytesAvailable() > 0){
+                        byte[] buffer = new byte[port.bytesAvailable()];
+                        port.readBytes(buffer, buffer.length);
+                        String serialInput = new String(buffer).trim(); 
 
-                    if(serialInput.equals("MODO:CADASTRAR")){
-                        currentMode = BUTTON_MODE.CADASTRAR;
-                        System.out.println("-CADASTRAR-");
-                    } else if(serialInput.equals("MODO:VALIDAR")){
-                        currentMode = BUTTON_MODE.VALIDAR;
-                        System.out.println("-VALIDAR-");
-                    } else if(serialInput.equals("MODO:DELETAR")){
-                        currentMode = BUTTON_MODE.EXCLUIR;
-                        System.out.println("-DELETAR-");
-                    } else if(serialInput.startsWith("UID: ")){
-                        String uid = serialInput.replace("UID: ", "").trim();
-                        card = new Card(uid, LocalDateTime.now().toString());
-                        if(currentMode == BUTTON_MODE.CADASTRAR){
-                            insertUID(conn, card);
-                        } else if(currentMode == BUTTON_MODE.VALIDAR){
-                            if(checkUID(conn, card)){
-                                System.out.println("Acesso liberado para UID: " + card.getUID());
-                                port.writeBytes("BIP:PERMITIDO\n".getBytes(), "BIP:PERMITIDO\n".length());
-                            } else {
-                                System.out.println("Acesso negado para UID: " + card.getUID());
-                                port.writeBytes("BIP:NEGADO\n".getBytes(), "BIP:NEGADO\n".length());
-                            }
-                        } else if(currentMode == BUTTON_MODE.EXCLUIR){
-                            try {
-                                deleteUID(conn, card);
-                                System.out.println("Cartão deletado.");
-                                port.writeBytes("BIP:PERMITIDO\n".getBytes(), "BIP:PERMITIDO\n".length());
-                            } catch (DataConflictException ERROR) {
-                                System.out.println("ERROR MESSAGE: " + ERROR.getMessage());
-                                port.writeBytes("BIP:DELETADOz\n".getBytes(), "BIP:DELETADO\n".length());
-                            }
-                        }
+                        Platform.runLater(() -> processInput(serialInput));
+                        
+                        
                     }
+                    try{ Thread.sleep(100);} catch(InterruptedException ignored){}
                 }
-            }
 
-        } catch (Exception ERROR) {
-            ERROR.printStackTrace();
-        } finally {
-            port.closePort();
-        }
+            } catch (Exception ERROR) {
+                ERROR.printStackTrace();
+            } finally {
+                port.closePort();
+            }   
+        });
+        serialThread.setDaemon(true);
+        serialThread.start();
     }
 
     private static void insertUID(Connection conn, Card card) throws SQLException {
@@ -100,5 +101,33 @@ public class Main {
         System.out.println("Cartão deletado");
         stmt.executeUpdate();
         stmt.close();
+    }
+
+    private void processInput(String serialInput ){
+        switch (serialInput) {
+            case "MODO:CADASTRAR":
+                currentMode = BUTTON_MODE.CADASTRAR;
+                actualMode.setText("Modo atual: CADASTRAR");
+                break;
+            case "MODO:VALIDAR":
+                currentMode = BUTTON_MODE.VALIDAR;
+                actualMode.setText("Modo atual: VALIDAR");
+                break;
+            case "MODO:DELETAR":
+                currentMode = BUTTON_MODE.EXCLUIR;
+                actualMode.setText("Modo atual: EXCLUIR");
+                break;  
+            default:
+                appendLog("Entrada: " + serialInput);
+                break;
+        }
+    }
+
+    private void appendLog(String message) {
+    logArea.appendText(message + "\n");
+    }
+
+    public static void main(String args[]){
+        launch(args);
     }
 }

@@ -1,1 +1,5 @@
-com\joaovithor\Main.class
+com\joaovithor\model\Card.class
+com\joaovithor\exception\DataConflictException.class
+com\joaovithor\view\Main$BUTTON_MODE.class
+com\joaovithor\view\Main.class
+com\joaovithor\repository\CardRepository.class
