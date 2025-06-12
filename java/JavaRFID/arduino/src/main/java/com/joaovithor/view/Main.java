@@ -1,4 +1,4 @@
-package com.joaovithor;
+package com.joaovithor.view;
 import com.fazecast.jSerialComm.SerialPort;
 import com.joaovithor.exception.DataConflictException;
 import com.joaovithor.model.Card;
@@ -11,7 +11,7 @@ public class Main {
     static BUTTON_MODE currentMode = BUTTON_MODE.CADASTRAR;
     public static void main(String[] args) {
         Card card;
-        SerialPort port = SerialPort.getCommPort("COM4"); 
+        SerialPort port = SerialPort.getCommPort("COM3"); 
         port.setBaudRate(9600);
 
         if (!port.openPort()) {
@@ -97,7 +97,6 @@ public class Main {
         if(!checkUID(conn, card)){throw new DataConflictException("Cartão não existe no banco de dados");}
         PreparedStatement stmt = conn.prepareStatement("DELETE FROM tags_rfid WHERE uid = ? ");
         stmt.setString(1, card.getUID());
-        System.out.println("Cartão deletado");
         stmt.executeUpdate();
         stmt.close();
     }
