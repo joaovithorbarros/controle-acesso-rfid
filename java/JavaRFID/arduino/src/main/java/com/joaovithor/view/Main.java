@@ -37,7 +37,7 @@ public class Main extends Application {
 
     }
     private void startSerialCommunication() {
-        SerialPort port = SerialPort.getCommPort("COM4"); 
+        SerialPort port = SerialPort.getCommPort("COM3"); 
         port.setBaudRate(9600);
 
         if (!port.openPort()) {
@@ -57,7 +57,30 @@ public class Main extends Application {
 
                         Platform.runLater(() -> processInput(serialInput));
                         
-                        
+                        if(serialInput.startsWith("UID: ")){
+                            String uid = serialInput.replace("UID: ", "");
+                            card = new Card(uid, LocalDateTime.now().toString());
+                            if(currentMode == BUTTON_MODE.CADASTRAR){
+                                insertUID(conn, card);
+                            } else if(currentMode == BUTTON_MODE.VALIDAR){
+                                if(checkUID(conn, card)){
+                                    appendLog("Acesso liberado para UID: " + card.getUID());
+                                    port.writeBytes("BIP:PERMITIDO\n".getBytes(), "BIP:PERMITIDO\n".length());
+                                } else {
+                                    appendLog("Acesso negado para UID: " + card.getUID());
+                                    port.writeBytes("BIP:NEGADO\n".getBytes(), "BIP:NEGADO\n".length());
+                                }
+                            } else if(currentMode == BUTTON_MODE.EXCLUIR){
+                                try {
+                                    deleteUID(conn, card);
+                                    appendLog("Cartão deletado.");
+                                    port.writeBytes("BIP:PERMITIDO\n".getBytes(), "BIP:PERMITIDO\n".length());
+                                } catch (DataConflictException ERROR) {
+                                    appendLog("ERROR MESSAGE: " + ERROR.getMessage());
+                                    port.writeBytes("BIP:DELETADO\n".getBytes(), "BIP:DELETADO\n".length());
+                                }
+                            }
+                        }
                     }
                     try{ Thread.sleep(100);} catch(InterruptedException ignored){}
                 }
@@ -95,7 +118,7 @@ public class Main extends Application {
     }
 
     private static void deleteUID(Connection conn, Card card) throws SQLException{
-        if(!checkUID(conn, card)){throw new DataConflictException("Cartão não existe no banco de dados");}
+        if(!checkUID(conn, card)){throw new DataConflictException("Cartao nao existe no banco de dados");}
         PreparedStatement stmt = conn.prepareStatement("DELETE FROM tags_rfid WHERE uid = ? ");
         stmt.setString(1, card.getUID());
         System.out.println("Cartão deletado");
@@ -117,9 +140,6 @@ public class Main extends Application {
                 currentMode = BUTTON_MODE.EXCLUIR;
                 actualMode.setText("Modo atual: EXCLUIR");
                 break;  
-            default:
-                appendLog("Entrada: " + serialInput);
-                break;
         }
     }
 
