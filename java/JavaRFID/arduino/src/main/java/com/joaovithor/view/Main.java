@@ -5,6 +5,7 @@ import com.joaovithor.model.Card;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
 
 public class Main extends Application {
 
-    private Label actualMode = new Label("Modo atual: ---");
+    private Label actualMode = new Label("Carregando...");
     private TextArea logArea = new TextArea();
     private Card card;
 
@@ -28,6 +29,10 @@ public class Main extends Application {
         logArea.setEditable(false);
         VBox root = new VBox(10, actualMode, logArea);
         Scene scene = new Scene(root, 500, 500);
+
+        root.setAlignment(Pos.TOP_CENTER);
+        actualMode.setStyle("-fx-font-size: 20px; -fx-text-fill: black; -fx-font-weight: bold;");
+        logArea.setStyle("-fx-font-size: 14px;");
 
         primaryStage.setTitle("Controle de Acesso - Interface");
         primaryStage.setScene(scene);
@@ -130,20 +135,30 @@ public class Main extends Application {
             case "MODO:CADASTRAR":
                 currentMode = BUTTON_MODE.CADASTRAR;
                 actualMode.setText("Modo atual: CADASTRAR");
+                actualMode.setStyle("-fx-text-fill: green; -fx-font-size: 16px; -fx-font-weight: bold;");
                 break;
             case "MODO:VALIDAR":
                 currentMode = BUTTON_MODE.VALIDAR;
                 actualMode.setText("Modo atual: VALIDAR");
+                actualMode.setStyle("-fx-text-fill: blue; -fx-font-size: 16px; -fx-font-weight: bold;");
                 break;
             case "MODO:DELETAR":
                 currentMode = BUTTON_MODE.EXCLUIR;
                 actualMode.setText("Modo atual: EXCLUIR");
+                actualMode.setStyle("-fx-text-fill: red; -fx-font-size: 16px; -fx-font-weight: bold;");
                 break;  
         }
     }
 
     private void appendLog(String message) {
-    logArea.appendText(message + "\n");
+        String currentText = logArea.getText();
+        String[] lines = currentText.split("\n");
+
+        if(lines.length >= 2){
+            logArea.clear();
+        }
+        logArea.appendText(message + "\n");
+
     }
 
     public static void main(String args[]){
