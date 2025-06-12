@@ -73,7 +73,7 @@ public class Main extends Application {
                             } else if(currentMode == BUTTON_MODE.EXCLUIR){
                                 try {
                                     deleteUID(conn, card);
-                                    appendLog("Cartão deletado.");
+                                    appendLog("Cartao deletado.");
                                     port.writeBytes("BIP:PERMITIDO\n".getBytes(), "BIP:PERMITIDO\n".length());
                                 } catch (DataConflictException ERROR) {
                                     appendLog("ERROR MESSAGE: " + ERROR.getMessage());
@@ -121,7 +121,6 @@ public class Main extends Application {
         if(!checkUID(conn, card)){throw new DataConflictException("Cartao nao existe no banco de dados");}
         PreparedStatement stmt = conn.prepareStatement("DELETE FROM tags_rfid WHERE uid = ? ");
         stmt.setString(1, card.getUID());
-        System.out.println("Cartão deletado");
         stmt.executeUpdate();
         stmt.close();
     }
